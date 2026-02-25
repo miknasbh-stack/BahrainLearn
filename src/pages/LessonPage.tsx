@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useStudentData } from '@/hooks/useStudentData';
+import { useGamification } from '@/hooks/useGamification';
 import { mockMathLesson } from '@/lib/mockData';
 import { Subject } from '@/types';
 import LessonViewer from '@/components/features/LessonViewer';
+import CelebrationModal from '@/components/features/CelebrationModal';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
@@ -13,6 +16,9 @@ export default function LessonPage() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { addPearls, addActivity, updateProgress, progress } = useStudentData();
+  const { updateProgress: updateGamificationProgress, checkAchievements } = useGamification();
+  const [celebrationAchievement, setCelebrationAchievement] = useState<any>(null);
+  const [showCelebration, setShowCelebration] = useState(false);
 
   const handleLessonComplete = (score: number, timeSpent: number, struggledConcepts: string[]) => {
     const pearls = Math.floor(score / 10) + (score >= 90 ? 10 : 0) + (timeSpent < 20 ? 5 : 0);
@@ -41,6 +47,18 @@ export default function LessonPage() {
         pearlsEarned: currentProgress.pearlsEarned + pearls,
         lastActivity: new Date(),
       });
+    }
+    
+    // Update gamification stats
+    updateGamificationProgress('lessons', 1);
+    updateGamificationProgress('pearls', pearls);
+    updateGamificationProgress('score', score);
+    
+    // Check for new achievements
+    const newAchievements = checkAchievements();
+    if (newAchievements.length > 0) {
+      setCelebrationAchievement(newAchievements[0]);
+      setShowCelebration(true);
     }
     
     toast.success(
@@ -74,6 +92,12 @@ export default function LessonPage() {
         </Button>
 
         <LessonViewer lesson={mockMathLesson} onComplete={handleLessonComplete} />
+        
+        <CelebrationModal
+          achievement={celebrationAchievement}
+          open={showCelebration}
+          onClose={() => setShowCelebration(false)}
+        />
       </div>
     </div>
   );

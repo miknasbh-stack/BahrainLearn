@@ -1,22 +1,70 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useStudentData } from '@/hooks/useStudentData';
+import { useGamification } from '@/hooks/useGamification';
 import { Subject } from '@/types';
 import SubjectCard from '@/components/features/SubjectCard';
+import MilestoneProgress from '@/components/features/MilestoneProgress';
+import WeeklyChallengeCard from '@/components/features/WeeklyChallengeCard';
 import { Button } from '@/components/ui/button';
-import { BarChart3, BookOpen, Sparkles } from 'lucide-react';
+import { BarChart3, BookOpen, Sparkles, Trophy, CreditCard } from 'lucide-react';
 
 export default function HomePage() {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { student, progress } = useStudentData();
+  const { stats } = useGamification();
 
   if (!student) return null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-bahrain-pearl to-white">
       <div className="container mx-auto px-4 py-8">
+        {/* Quick Actions */}
+        <div className="grid md:grid-cols-2 gap-4 mb-8">
+          <Button
+            onClick={() => navigate('/rewards')}
+            size="lg"
+            variant="outline"
+            className="gap-2 p-6 h-auto justify-start border-2 border-bahrain-gold/30 hover:border-bahrain-gold bg-gradient-to-r from-bahrain-gold/5 to-transparent"
+          >
+            <Trophy className="w-6 h-6 text-bahrain-gold" />
+            <div className="text-right flex-1">
+              <p className="font-bold text-lg">{t('الإنجازات والمكافآت', 'Achievements & Rewards')}</p>
+              <p className="text-sm text-gray-600">
+                {stats.achievementsUnlocked.length} {t('إنجاز تم فتحه', 'achievements unlocked')}
+              </p>
+            </div>
+          </Button>
+          
+          <Button
+            onClick={() => navigate('/subscribe')}
+            size="lg"
+            variant="outline"
+            className="gap-2 p-6 h-auto justify-start border-2 border-primary/30 hover:border-primary bg-gradient-to-r from-primary/5 to-transparent"
+          >
+            <CreditCard className="w-6 h-6 text-primary" />
+            <div className="text-right flex-1">
+              <p className="font-bold text-lg">{t('الباقات والاشتراك', 'Plans & Subscription')}</p>
+              <p className="text-sm text-gray-600">
+                {t('من 10 د.ب شهرياً', 'From 10 BHD/month')}
+              </p>
+            </div>
+          </Button>
+        </div>
+
+        {/* Milestone Progress */}
+        <div className="mb-8">
+          <MilestoneProgress />
+        </div>
+
+        {/* Weekly Challenge */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            {t('التحدي الأسبوعي', 'Weekly Challenge')}
+          </h2>
+          <WeeklyChallengeCard />
+        </div>
+
         {/* Welcome Hero */}
         <div className="bg-gradient-to-r from-primary to-bahrain-sand text-white rounded-2xl p-8 mb-8 shadow-xl">
           <div className="flex items-center justify-between flex-wrap gap-4">
